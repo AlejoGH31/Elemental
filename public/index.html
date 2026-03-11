@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="./decoracion.css">
+        <meta charset="utf-8" />
+        <title>ELEMENTAL</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+    </head>
+    <body>
+        <section id="menu-principal">
+            <img id="titulo-juego" src="./assets/Titulo Elemental.png">
+            <button class ="botones-principales" id="boton-jugar">JUGAR</button>
+            <button class ="botones-principales" id="quitar-juego">QUITAR</button>
+            <button class ="botones-principales" id="boton-creditos">CREDITOS</button>
+        </section>
+
+        <section id="pantalla-creditos">
+            <p id="texto-creditos">Gracias a:<br>
+                Platzi por guiarme en el desarrollo del juego con su curso.<br>
+                Alejo desarrollador del juego completo.<br>
+                A todas las personas que me apoyaron.<br>
+                Y a ti por jugarlo.<br>
+            </p>
+        </section>
+
+        <section id="SeleccionarMascota">
+
+            <h1 class="titulo">ELEMENTAL</h1>
+
+            <h2 class="subtitulo">Elige tu mascota:</h2>
+
+            <div id="contenedor-tarjetas" class="tarjetas">
+            </div>
+
+            <label></label>
+
+            <button id="boton-seleccionar">SELECCIONAR</button>
+        </section>
+
+        <section id="canvas-juego">
+            <h2 class="subtitulo">Recorre el mapa con tu mascota</h2>
+            <canvas id="mapa-juego"></canvas>
+            <div id="flechas">
+            <button id="b-arriba" onmouseup="detenerMovimiento()" onmousedown="moverArriba()">🡹</button>
+            <button id="b-abajo" onmouseup="detenerMovimiento() "onmousedown="moverAbajo()">🡻</button>
+            <button id="b-izquierda" onmouseup="detenerMovimiento()"onmousedown="moverIzquierda()">🡸</button>
+            <button id="b-derecha" onmouseup="detenerMovimiento()"onmousedown="moverDerecha()">🡺</button>
+            </div>
+        </section>
+
+        <section id="SeleccionarAtaque">
+            <h1 class="titulo">ELEMENTAL</h1>
+
+            <h2 class="subtitulo">Elige tu ataque:</h2>
+
+            <div id="contenedor-ataques" class="tarjetas-ataque">
+            </div>
+        
+        <section id="pantalla-dos">
+
+            <div id="informacion">
+                <p id="resultado">Mucha suerte!</p>
+            </div>
+
+            <div id="ataques">
+                <div id="tarjeta-ataques-jugador">
+                    <p class="texto-vidas-tarjeta"> Victorias: <span id="victorias-jugador">0</span> </p>
+                    <p id="mascota-jugador"></p>
+                    <div id="ataques-del-jugador"></div>
+                </div>
+
+                <div id="tarjeta-ataques-enemigo">
+                    <p class="texto-vidas-tarjeta"> Victorias: <span id="victorias-enemigo">0</span> </p>
+                    <p id="mascota-enemigo"></p>
+                    <div id="ataques-del-enemigo"></div>
+                </div>
+            </div>
+        </section>
+            
+
+        <section id="ReiniciarJuego">
+            <button id="boton-reiniciar">REINICIAR</button>
+        </section>
+
+        </section>
+        <script src="./scriptElemental.js"></script>
+    </body>
+</html>
