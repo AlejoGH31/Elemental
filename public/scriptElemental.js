@@ -197,7 +197,7 @@ function mostrarCreditos() {
 }
 
 function unirseJuego() {
-    fetch("http://192.168.1.17:8080/unirse")
+    fetch("https://elemental-754y.onrender.com/unirse")
         .then(function (res) {
             if (res.ok) {
                 res.text()
@@ -254,7 +254,7 @@ function mostrarCreditos() {
 }
 
 function mascotaSeleccionada(guardarMascota) {
-    fetch(`http://192.168.1.17:8080/elemental/${jugadorId}`, {
+    fetch(`https://elemental-754y.onrender.com/elemental/${jugadorId}`, {
         method: "post",
         headers: {
             "Content-Type": "application/json"
@@ -334,7 +334,7 @@ function seleccionarMascotaEnemigo(enemigo) {
 }
 
 function enviarAtaques() {
-    fetch (`http://192.168.1.17:8080/elemental/${jugadorId}/ataques`, {
+    fetch (`https://elemental-754y.onrender.com/elemental/${jugadorId}/ataques`, {
         method: "post",
         headers: {
             "Content-Type": "application/json"
@@ -347,7 +347,7 @@ function enviarAtaques() {
 }
 
 function obtenerAtaques() {
-    fetch(`http://192.168.1.17:8080/elemental/${enemigoId}/ataques`)
+    fetch(`https://elemental-754y.onrender.com/elemental/${enemigoId}/ataques`)
         .then(function (res) {
             if(res.ok) {
                 res.json()
@@ -489,7 +489,7 @@ function pintarMascotaYJuego() {
 }
 
 function enviarPosicion(x, y) { 
-    fetch(`http://192.168.1.17:8080/elemental/${jugadorId}/posicion`, { 
+    fetch(`https://elemental-754y.onrender.com/elemental/${jugadorId}/posicion`, { 
         method: "post", 
         headers: { 
             "Content-Type": "application/json" 
