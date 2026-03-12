@@ -639,6 +639,11 @@ function colisiones(enemigo) {
     ) {
         return
     }
+
+    if(enemigo.x == undefined || enemigo.y == undefined) {
+        return
+    }
+    
     detenerMovimiento()
     clearInterval(intervalo)
     seleccionarMascotaEnemigo(enemigo)
