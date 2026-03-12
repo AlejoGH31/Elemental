@@ -9,9 +9,24 @@ app.use(express.json())
 
 const jugadores = []
 
+setInterval(() => {
+    const ahora = Date.now()
+
+    for (let i = jugadores.length - 1; i >= 0; i--) {
+        const jugador = jugadores[i]
+
+        if (ahora - jugador.inactividad > 5000) {
+            console.log("Jugador eliminado por inactividad:", jugador.id)
+            jugadores.splice(i, 1)
+        }
+    }
+
+}, 5000)
+
 class Jugador {
     constructor(id) {
         this.id = id
+        this.inactividad = inactividad
     }
 
     asignarMascota(mascota) {
@@ -89,6 +104,19 @@ app.post("/elemental/:jugadorId/ataques", (req, res) => {
     
     if (jugadorIndex >= 0) {
         jugadores[jugadorIndex].asignarAtaques(ataques)
+    }
+
+    res.end()
+})
+
+app.post("/elemental/:jugadorId/desconectar", (req, res) => {
+    const { jugadorId } = req.params
+
+    const index = jugadores.findIndex(j => j.id === jugadorId)
+
+    if (index !== -1) {
+        jugadores.splice(index, 1)
+        console.log("Jugador desconectado:", jugadorId)
     }
 
     res.end()
