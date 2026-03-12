@@ -24,7 +24,7 @@ setInterval(() => {
 }, 5000)
 
 class Jugador {
-    constructor(id) {
+    constructor(id, inactividad) {
         this.id = id
         this.inactividad = inactividad
     }
