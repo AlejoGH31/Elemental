@@ -221,26 +221,21 @@ function cerrarJuego() {
 }
 
 function seleccionarMascota() {
-    sectionMascota.style.display = "none"
-
     if(mascota1.checked) {
-        sectionCanvasJuego.style.display = "flex"
         spanMascotaJugador.innerHTML = mascota1.id
         guardarMascota = mascota1.id
     } else if (mascota2.checked) {
-        sectionCanvasJuego.style.display = "flex"
         spanMascotaJugador.innerHTML = mascota2.id
         guardarMascota = mascota2.id
     } else if (mascota3.checked) {
-        sectionCanvasJuego.style.display = "flex"
         spanMascotaJugador.innerHTML = mascota3.id
         guardarMascota = mascota3.id
     } else {
         alert("Selecciona una mascota, porfavor")
-        sectionMascota.style.display = "flex"
-        sectionAtaque.style.display = "none"
-        sectionCanvasJuego.style.display = "none"
+        return
     }
+    sectionMascota.style.display = "none"
+    sectionCanvasJuego.style.display = "flex"
 
     mascotaSeleccionada(guardarMascota)
 
@@ -643,7 +638,7 @@ function colisiones(enemigo) {
     if(enemigo.x == undefined || enemigo.y == undefined) {
         return
     }
-    
+
     detenerMovimiento()
     clearInterval(intervalo)
     seleccionarMascotaEnemigo(enemigo)
