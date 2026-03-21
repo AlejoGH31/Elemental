@@ -477,9 +477,9 @@ function pintarMascotaYJuego() {
 
     enviarPosicion(miPersonaje.x, miPersonaje.y)
 
-    personajes.forEach(function (personaje) {
+    personajesEnemigos.forEach(function (personaje) {
         personaje.pintarMascota()
-        colisiones(enemigo)
+        colisiones(personaje)
     })
 }
 
