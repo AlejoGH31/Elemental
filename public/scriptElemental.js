@@ -30,6 +30,13 @@ const btnIzquierda = document.getElementById("b-izquierda")
 const btnDerecha = document.getElementById("b-derecha")
 const btnCreditos = document.getElementById("boton-creditos")
 const pantallaCreditos = document.getElementById("pantalla-creditos")
+
+const ENV = "dev" // cambia a "prod" cuando publiques
+
+const API_URL = ENV === "dev"
+    ? "http://192.168.1.17:8080"
+    : "https://elemental-754y.onrender.com"
+
 let jugadorId = null
 let enemigoId = null
 let personajes = []
@@ -189,15 +196,13 @@ function dispositivoMovil() {
         flechasDispositivo.style.display = "none"
     }
 
-
-
 function mostrarCreditos() {
     sectionMenuPrincipal.style.display = "none"
     pantallaCreditos.style.display = "flex"
 }
 
 function unirseJuego() {
-    fetch("https://elemental-754y.onrender.com/unirse")
+    fetch(`${API_URL}/unirse`)
         .then(function (res) {
             if (res.ok) {
                 res.text()
@@ -249,7 +254,7 @@ function mostrarCreditos() {
 }
 
 function mascotaSeleccionada(guardarMascota) {
-    fetch(`https://elemental-754y.onrender.com/elemental/${jugadorId}`, {
+    fetch(`${API_URL}/elemental/${jugadorId}`, {
         method: "post",
         headers: {
             "Content-Type": "application/json"
@@ -329,7 +334,7 @@ function seleccionarMascotaEnemigo(enemigo) {
 }
 
 function enviarAtaques() {
-    fetch (`https://elemental-754y.onrender.com/elemental/${jugadorId}/ataques`, {
+    fetch (`${API_URL}/elemental/${jugadorId}/ataques`, {
         method: "post",
         headers: {
             "Content-Type": "application/json"
@@ -342,7 +347,7 @@ function enviarAtaques() {
 }
 
 function obtenerAtaques() {
-    fetch(`https://elemental-754y.onrender.com/elemental/${enemigoId}/ataques`)
+    fetch(`${API_URL}/elemental/${enemigoId}/ataques`)
         .then(function (res) {
             if(res.ok) {
                 res.json()
@@ -421,7 +426,7 @@ function combate() {
 function revisarVictorias() {
     if (victoriasJugador == victoriasEnemigo) {
         mensajeFinal("Mmmm mismas victorias? supongo que fue un empate...") 
-    } else if (vidasJugador > victoriasEnemigo) {
+    } else if (victoriasJugador > victoriasEnemigo) {
         mensajeFinal("Tuviste mas victorias que el enemigo, ganaste😀")
     } else {
         mensajeFinal("El rival te ganó😭 puedes vencerlo en la siguiente?")
@@ -486,7 +491,7 @@ function pintarMascotaYJuego() {
 }
 
 function enviarPosicion(x, y) { 
-    fetch(`https://elemental-754y.onrender.com/elemental/${jugadorId}/posicion`, { 
+    fetch(`${API_URL}/elemental/${jugadorId}/posicion`, { 
         method: "post", 
         headers: { 
             "Content-Type": "application/json" 
