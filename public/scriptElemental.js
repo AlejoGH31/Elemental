@@ -33,7 +33,7 @@ const pantallaCreditos = document.getElementById("pantalla-creditos")
 
 const ENV = "dev" // cambia a "prod" cuando publiques
 
-const API_URL = ENV === "dev"
+const API_URL = window.location.hostname === "localhost"
     ? "http://192.168.1.17:8080"
     : "https://elemental-754y.onrender.com"
 
