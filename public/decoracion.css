@@ -7,7 +7,7 @@ body {
     font-style: normal;
     background: url(./assets/fondo-juego.jpg) no-repeat center center fixed;
     background-size: cover;
-    overflow: hidden
+    overflow-y: scroll;
 }
 
 #SeleccionarMascota {
@@ -284,6 +284,23 @@ input:checked + label {
     font-size: 20px;
     opacity: 0.7;
     font-family: monospace;
+}
+
+.e-monedas {
+    display: flex;
+    position: fixed;
+    right: 1%;
+    top: 2%;
+    background-color: yellow;
+    width: 100px;
+    height: 30px;
+    border-radius: 20px;
+    flex-direction: row;
+}
+
+#img-monedas {
+    width: 30px;
+    height: 30px;
 }
 
 @media (max-width: 500px) {
