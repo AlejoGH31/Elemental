@@ -204,6 +204,7 @@ input:checked + label {
   width: 50px;
   height: 50px;
   background-color: yellow;
+  font-size: 20px;
 }
 
 #b-abajo {
@@ -212,6 +213,7 @@ input:checked + label {
   width: 50px;
   height: 50px;
   background-color: yellow;
+  font-size: 20px;
 }
 
 #b-izquierda {
@@ -220,6 +222,7 @@ input:checked + label {
   width: 50px;
   height: 50px;
   background-color: yellow;
+  font-size: 20px;
 }
 
 #b-derecha {
@@ -228,6 +231,7 @@ input:checked + label {
   width: 50px;
   height: 50px;
   background-color: yellow;
+  font-size: 20px;
 }
 
 #menu-principal {
@@ -286,33 +290,18 @@ input:checked + label {
     font-family: monospace;
 }
 
-.e-monedas {
-    display: flex;
-    position: fixed;
-    right: 1%;
-    top: 2%;
-    background-color: yellow;
-    width: 100px;
-    height: 30px;
-    border-radius: 20px;
-    flex-direction: row;
-}
-
-#img-monedas {
-    width: 30px;
-    height: 30px;
-}
-
 @media (max-width: 500px) {
     .tarjetas, .tarjetas-ataque {
         flex-direction: column;
     }
 
     .tarjeta-de-elemental {
-        height: 130px;
+        width: 120px;
+        height: 120px;
     }
 
     .tarjeta-de-elemental img{
-        height: 85px;
+        height: 75px;
+        width: 107px;
     }
 }
