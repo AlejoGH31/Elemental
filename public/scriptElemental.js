@@ -381,7 +381,9 @@ function ataqueAleatorioEnemigo() {
 }
 
 function iniciarPelea() {
-    if (ataqueDinamicoJugador.length === 5) {
+    if (ataqueDinamicoJugador.length === 5 && !combateEjecutado) {
+        combateEjecutado = true
+        ataqueEnemigo = ataqueDinamicoJugador
         combate()
     }
 }
@@ -393,6 +395,8 @@ function indexAmbosJugadores(jugador, enemigo) {
 function combate() {
     clearInterval(intervalo)
 
+    ataquesDelJugador.innerHTML = ""
+    ataquesDelEnemigo.innerHTML = ""
     for (let index = 0; index < ataqueDinamicoJugador.length; index++) {
         if(ataqueDinamicoJugador[index] === ataqueEnemigo[index]) {
             indexAmbosJugadores(index, index)
@@ -458,6 +462,7 @@ function mensajeFinal(resultadoFinal) {
 }
 
 function reiniciarJuego() {
+    combateEjecutado = false
     location.reload()
 }
 
