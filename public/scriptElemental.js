@@ -381,10 +381,14 @@ function ataqueAleatorioEnemigo() {
 }
 
 function iniciarPelea() {
-    if (ataqueDinamicoJugador.length === 5 && !combateEjecutado) {
-        combateEjecutado = true
-        ataqueEnemigo = ataqueDinamicoJugador
-        combate()
+    if (
+    ataques.length === 5 &&
+    ataqueDinamicoJugador.length === 5 &&
+    !combateEjecutado
+    ) {
+    combateEjecutado = true
+    ataqueEnemigo = ataques
+    combate()
     }
 }
 function indexAmbosJugadores(jugador, enemigo) {
@@ -394,6 +398,9 @@ function indexAmbosJugadores(jugador, enemigo) {
 
 function combate() {
     clearInterval(intervalo)
+
+    victoriasJugador = 0
+    victoriasEnemigo = 0
 
     ataquesDelJugador.innerHTML = ""
     ataquesDelEnemigo.innerHTML = ""
