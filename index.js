@@ -7,7 +7,7 @@ app.use(express.static("public"))
 app.use(cors())
 app.use(express.json())
 
-const jugadores = []
+let jugadores = []
 
 class Jugador {
     constructor(id) {
@@ -64,21 +64,31 @@ app.post("/elemental/:jugadorId", (req, res) => {
 })
 
 app.post("/elemental/:jugadorId/posicion", (req, res) => {
-    const jugadorId = req.params.jugadorId || ""
-    const x = req.body.x || 0
-    const y = req.body.y || 0
-
-    const jugadorIndex = jugadores.findIndex((jugador) => jugadorId === jugador.id)
+    const { x, y } = req.body
+    const { jugadorId } = req.params
     
-    if (jugadorIndex >= 0) {
-        jugadores[jugadorIndex].actualizarPosicion(x, y)
+    // Actualiza posición
+    const jugador = jugadores.find(j => j.id === jugadorId)
+    if (jugador) {
+        jugador.x = x
+        jugador.y = y
     }
+    
+    // Filtra enemigos: solo los que tienen mascota definida
+    const enemigos = jugadores
+        .filter(j => j.id !== jugadorId && j.mascota !== undefined)
+    
+    res.json({ enemigos })
+})
 
-    const enemigos = jugadores.filter((jugador) => jugadorId !== jugador.id)
+app.post("/disconnect", (req, res) => {
+    const { jugadorId } = req.body
 
-    res.send({
-        enemigos
-    })
+    jugadores = jugadores.filter(j => j.id !== jugadorId)
+
+    console.log("Jugador desconectado INMEDIATAMENTE:", jugadorId)
+
+    res.sendStatus(200)
 })
 
 app.post("/elemental/:jugadorId/ataques", (req, res) => {

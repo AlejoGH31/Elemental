@@ -1,0 +1,8 @@
+ALTER TABLE fondos6
+ADD prueba INT
+
+ALTER TABLE fondos6
+RENAME COLUMN prueba TO test
+
+ALTER TABLE fondos6
+MODIFY COLUMN test VARCHAR(200)

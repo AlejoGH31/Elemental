@@ -1,0 +1,3 @@
+SELECT * FROM jugadores WHERE monedas BETWEEN 200 AND 300;
+
+SELECT * FROM jugadores WHERE monedas BETWEEN 0 AND 500;

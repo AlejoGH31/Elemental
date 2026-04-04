@@ -1,0 +1,1 @@
+DELETE FROM jugadores WHERE jugador_id = 7;

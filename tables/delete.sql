@@ -1,0 +1,3 @@
+DROP TABLE fondos6;
+
+DROP COLUMN test;

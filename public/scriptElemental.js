@@ -30,6 +30,7 @@ const btnIzquierda = document.getElementById("b-izquierda")
 const btnDerecha = document.getElementById("b-derecha")
 const btnCreditos = document.getElementById("boton-creditos")
 const pantallaCreditos = document.getElementById("pantalla-creditos")
+const regresarCreditos = document.getElementById("regresar-creditos")
 
 const ENV = "dev" // cambia a "prod" cuando publiques
 
@@ -69,6 +70,8 @@ let buscarAltura
 let anchoDelMapa = window.innerWidth - 20
 const anchoMaximoMapa = 500
 let opcionDeAtaques
+let enMapa = false
+let ultimoMovimiento = Date.now()
 
 if (anchoDelMapa > anchoMaximoMapa) {
     anchoDelMapa = anchoMaximoMapa - 20
@@ -148,7 +151,29 @@ selvatron.ataques.push(...selvatron_ataques)
 
 personajes.push(aquanut, drakon, selvatron)
 
+function desconectarJugador() {
+    console.log("Jugador desconectado completamente")
+    enMapa = false
+    
+    // Enviar al servidor primero
+    fetch(`${API_URL}/disconnect`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jugadorId: jugadorId })
+    })
+    
+    lienzo.clearRect(0, 0, mapaJuego.width, mapaJuego.height)
+    clearInterval(intervalo)
+    window.removeEventListener("keydown", teclas)
+    window.removeEventListener("keyup", detenerMovimiento)
+    
+    sectionCanvasJuego.style.display = "none"
+    sectionMenuPrincipal.style.display = "flex"
+    alert("Desconectado por inactividad")
+}
+
 function iniciarJuego() {
+    enMapa = false
     unirseJuego()
     sectionMenuPrincipal.style.display = "flex"
     sectionMascota.style.display = "none"
@@ -156,8 +181,6 @@ function iniciarJuego() {
     sectionReiniciar.style.display = "none"
     sectionCanvasJuego.style.display = "none"
     pantallaCreditos.style.display = "none"
-
-
 
     personajes.forEach((personaje) => {
         opcionDePersonajes = `
@@ -182,14 +205,34 @@ function iniciarJuego() {
     botonMascota.addEventListener("click", seleccionarMascota)
 
     botonReiniciar.addEventListener("click", reiniciarJuego)
-
 }
 
-function dispositivoMovil() {
-        const pantallaTouch = navigator.maxTouchPoints > 0 || "ontouchstart" in window;
-        
-        return pantallaTouch
+setInterval(() => {
+
+    if (!enMapa) return // 👈 SOLO en mapa
+
+    const ahora = Date.now()
+
+    if (ahora - ultimoMovimiento > 5000) {
+        console.log("Inactivo 5s → desconectar")
+
+        const data = new Blob(
+            [JSON.stringify({ jugadorId: jugadorId })],
+            { type: "application/json" }
+        )
+
+        navigator.sendBeacon("/disconnect", data)
+
+        desconectarJugador() 
     }
+
+}, 1000)
+
+function dispositivoMovil() {
+    const pantallaTouch = navigator.maxTouchPoints > 0 || "ontouchstart" in window;
+    return pantallaTouch
+}
+
     if (dispositivoMovil()) {
         flechasDispositivo.style.display = "flex"
     } else {
@@ -199,6 +242,15 @@ function dispositivoMovil() {
 function mostrarCreditos() {
     sectionMenuPrincipal.style.display = "none"
     pantallaCreditos.style.display = "flex"
+    enMapa = false 
+}
+
+regresarCreditos.addEventListener("click", quitarCreditos)
+
+function quitarCreditos() {
+    pantallaCreditos.style.display = "none"
+    sectionMenuPrincipal.style.display = "flex"
+    enMapa = false 
 }
 
 function unirseJuego() {
@@ -215,10 +267,22 @@ function unirseJuego() {
         })
 }
 
+window.addEventListener("beforeunload", () => {
+    const data = new Blob(
+        [JSON.stringify({ jugadorId: jugadorId })],
+        { type: "application/json" }
+    )
+
+    navigator.sendBeacon("/disconnect", data)
+
+    desconectarJugador()
+})
+
 function empezarJuego() {
     sectionMenuPrincipal.style.display = "none"
     sectionMascota.style.display = "flex"
     pantallaCreditos.style.display = "none"
+    enMapa = false
 }
 
 function cerrarJuego() {
@@ -248,11 +312,6 @@ function seleccionarMascota() {
     iniciarMapa()
 }
 
-function mostrarCreditos() {
-    sectionMenuPrincipal.style.display = "none"
-
-}
-
 function mascotaSeleccionada(guardarMascota) {
     fetch(`${API_URL}/elemental/${jugadorId}`, {
         method: "post",
@@ -271,6 +330,8 @@ function iniciarMapa() {
     intervalo = setInterval(pintarMascotaYJuego, 100)
     window.addEventListener("keydown", teclas)
     window.addEventListener("keyup", detenerMovimiento)
+    enMapa = true
+    ultimoMovimiento = Date.now()
 }
 
 //funcion para extraer los ataques unicos de los personajes renderizados, AtaquesDPP = AtaquesDinamicosPorPersonaje
@@ -470,6 +531,7 @@ function mensajeFinal(resultadoFinal) {
 
 function reiniciarJuego() {
     combateEjecutado = false
+    enMapa = false 
     location.reload()
 }
 
@@ -517,7 +579,8 @@ function enviarPosicion(x, y) {
             if (res.ok) { 
                 res.json() 
                 .then(function ({ enemigos }) { 
-                    console.log(enemigos) 
+                    console.log(enemigos)
+                    personajesEnemigos = []
                     personajesEnemigos = enemigos.map(function (enemigo) { 
                         if (enemigo.mascota != undefined) { 
                             let mascotaEnemiga = null 
@@ -567,18 +630,22 @@ function teclas(event) {
 
 function moverArriba() {
     miPersonaje.velocidadY = -5
+    ultimoMovimiento = Date.now()
 }
 
 function moverAbajo() {
     miPersonaje.velocidadY = 5
+    ultimoMovimiento = Date.now()
 }
 
 function moverIzquierda() {
     miPersonaje.velocidadX = -5
+    ultimoMovimiento = Date.now()
 }
 
 function moverDerecha() {
     miPersonaje.velocidadX = 5
+    ultimoMovimiento = Date.now()
 }
 
 function detenerMovimiento() {
@@ -660,6 +727,7 @@ function colisiones(enemigo) {
 
     detenerMovimiento()
     clearInterval(intervalo)
+    enMapa = false 
     seleccionarMascotaEnemigo(enemigo)
     console.log("Hubo colision");
 
