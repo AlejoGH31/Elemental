@@ -221,12 +221,28 @@ setInterval(() => {
             { type: "application/json" }
         )
 
-        navigator.sendBeacon("/disconnect", data)
+        navigator.sendBeacon(`${API_URL}/disconnect`, data)
 
         desconectarJugador() 
     }
 
 }, 1000)
+
+setInterval(() => {
+
+    if (!jugadorId) return
+
+    fetch(`${API_URL}/heartbeat`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            jugadorId: jugadorId
+        })
+    })
+
+}, 2000)
 
 function dispositivoMovil() {
     const pantallaTouch = navigator.maxTouchPoints > 0 || "ontouchstart" in window;
@@ -273,9 +289,7 @@ window.addEventListener("beforeunload", () => {
         { type: "application/json" }
     )
 
-    navigator.sendBeacon("/disconnect", data)
-
-    desconectarJugador()
+    navigator.sendBeacon(`${API_URL}/disconnect`, data)
 })
 
 function empezarJuego() {

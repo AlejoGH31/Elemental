@@ -12,6 +12,7 @@ let jugadores = []
 class Jugador {
     constructor(id) {
         this.id = id
+        this.ultimoLatido = Date.now() // 🔥 NUEVO
     }
 
     asignarMascota(mascota) {
@@ -91,6 +92,18 @@ app.post("/disconnect", (req, res) => {
     res.sendStatus(200)
 })
 
+app.post("/heartbeat", (req, res) => {
+    const { jugadorId } = req.body
+
+    const jugador = jugadores.find(j => j.id === jugadorId)
+
+    if (jugador) {
+        jugador.ultimoLatido = Date.now()
+    }
+
+    res.sendStatus(200)
+})
+
 app.post("/elemental/:jugadorId/ataques", (req, res) => {
     const jugadorId = req.params.jugadorId || ""
     const ataques = req.body.ataques || []
@@ -113,6 +126,22 @@ app.get("/elemental/:jugadorId/ataques", (req, res) => {
 })
 
 const PORT = process.env.PORT || 8080
+
+setInterval(() => {
+
+    const ahora = Date.now()
+
+    jugadores = jugadores.filter(jugador => {
+        const vivo = ahora - jugador.ultimoLatido < 2000
+
+        if (!vivo) {
+            console.log("Jugador eliminado por heartbeat:", jugador.id)
+        }
+
+        return vivo
+    })
+
+}, 2000)
 
 app.listen(PORT, "0.0.0.0", () => {
     console.log("Servidor funcionando")
