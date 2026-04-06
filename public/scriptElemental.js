@@ -286,16 +286,16 @@ regresarCreditos.addEventListener("click", quitarCreditos)
 // asigna un id aleatorio entre 0 y 1 a cada persona que entra al juego
 function unirseJuego() {
     fetch(`${API_URL}/unirse`)
-        .then(function (res) {
-            if (res.ok) {
-                res.text()
-                    .then(function (respuesta) {
-                        console.log(respuesta)
-                        console.log(res)
-                        jugadorId = respuesta
-                    })
-            }
-        })
+    .then(function (res) {
+        if (res.ok) {
+            res.text()
+                .then(function (respuesta) {
+                    console.log(respuesta)
+                    console.log(res)
+                    jugadorId = respuesta
+                })
+        }
+    })
 }
 
 // detecta si el jugador cerró la pestaña o la ventana con el juego (inseguro) tiene respaldo de heartbeat (seguro)
