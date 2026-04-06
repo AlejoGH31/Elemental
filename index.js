@@ -47,7 +47,7 @@ app.get("/unirse", (req, res) => {
 
     jugadores.push(jugador)
 
-    res.setHeader("Access-Control-Allow-Origin", "*")
+    res.setHeaders("Access-Control-Allow-Origin", "*")
 
     res.send(id)
 })
