@@ -80,7 +80,7 @@ app.post("/elemental/:jugadorId/posicion", (req, res) => {
     
     // Filtra enemigos: solo los que tienen mascota definida
     
-    const enemigos = jugadores.find(j => j.id === jugadorId)
+    const enemigos = jugadores.filter(j => j.id !== jugadorId)
     res.json({ enemigos })
 })
 
