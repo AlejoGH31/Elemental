@@ -1,7 +1,6 @@
 // Servidor y dependencias/librerias
 const express = require("express")
 const cors = require("cors")
-
 const app = express()
 
 app.use(express.static("public"))
@@ -80,9 +79,8 @@ app.post("/elemental/:jugadorId/posicion", (req, res) => {
     }
     
     // Filtra enemigos: solo los que tienen mascota definida
-    const enemigos = jugadores
-        .filter(j => j.id !== jugadorId && j.mascota !== undefined)
     
+    const enemigos = jugadores.find(j => j.id === jugadorId)
     res.json({ enemigos })
 })
 

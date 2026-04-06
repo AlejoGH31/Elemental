@@ -35,14 +35,14 @@ const regresarCreditos = document.getElementById("regresar-creditos")
 
 const ENV = "dev" // separa entornos dev y prod para hacer pruebas locales y despliegue en render.com
 
-//detecta automaciamente el entorno y asigna la URL del backend según corresponda
-const API_URL = window.location.hostname === "localhost"
+// detecta automaticamente el entorno y asigna la URL del backend según corresponda
+let API_URL = window.location.hostname === "localhost"
     ? "http://192.168.1.17:8080"
     : "https://elemental-754y.onrender.com"
 
 // variables globales
-let jugadorId = null // id de cada jugador
-let enemigoId = null // id de cada enemigo
+let jugadorId // id de cada jugador
+let enemigoId // id de cada enemigo
 let personajes = [] // personajes disponibles para jugar
 let personajesEnemigos = [] // todos los personajes enemigos que se van a mostrar en el mapa
 let ataqueJugador = []
@@ -52,7 +52,7 @@ let mascota1
 let mascota2
 let mascota3
 let guardarMascota
-let miPersonaje //personaje del jugador
+let miPersonaje // personaje del jugador
 let ataquesPersonajeEnemigo = [] // botones de ataque dinamicos, segun el personaje elegido por el enemigo
 let ataqueDinamicoJugador = [] // botones de ataque dinamicos, segun el personaje elegido por el jugador
 let botonFuego
@@ -63,10 +63,8 @@ let indexAtaqueJugador
 let indexAtaqueEnemigo
 let victoriasJugador = 0
 let victoriasEnemigo = 0
-let vidasJugador = 3
-let vidasEnemigo = 3
 let lienzo = mapaJuego.getContext("2d") // el mapa
-let intervalo // indica cada cuanto tiempo se realizan ciertas acciones, como pintar el mapa, obtener ataques del enemigo, etc
+let intervalo // indica cada cuanto tiempo se realizan ciertas acciones
 let fondoBatalla = new Image()
 fondoBatalla.src = "./assets/fondo-batalla.png" 
 let buscarAltura
@@ -74,20 +72,20 @@ let anchoDelMapa = window.innerWidth - 20
 const anchoMaximoMapa = 500
 let opcionDeAtaques
 let enMapa = false // controla si el jugador esta en el mapa para el sistema de desconexión por inactividad
-let ultimoMovimiento = Date.now() //variables globales
+let ultimoMovimiento = Date.now() // el ultimo movimiento del jugador es ahora
 
 if (anchoDelMapa > anchoMaximoMapa) {
     anchoDelMapa = anchoMaximoMapa - 20
-}                                      
+}
 
 buscarAltura = anchoDelMapa * 600 / 800
 
 mapaJuego.width = anchoDelMapa
 mapaJuego.height = buscarAltura
 
-//el constructor de cada personaje, con sus atributos y métodos para pintar su imagen en el mapa
+// el constructor de cada personaje, con sus atributos y métodos para pintar su imagen en el mapa
 class Personaje {
-    constructor(nombre, foto, vidas, fotoCara, id = null) {
+    constructor(nombre, foto, vidas, fotoCara, id) {
         this.id = id
         this.nombre = nombre
         this.foto = foto
@@ -106,7 +104,7 @@ class Personaje {
         this.velocidadY = 0
     }
 
-//funcion de clase, pinta el personaje y sus coordenadas
+// funcion de clase, pinta el personaje y sus coordenadas
     pintarMascota() {
         lienzo.drawImage(
             this.fotoCara,
@@ -118,7 +116,7 @@ class Personaje {
     }
 }
 
-//crea los personajes jugables
+// guarda la creacion de personajes en una variable
 let aquanut = new Personaje("Aquanut", "./assets/aquanut-juego.png", 3, "./assets/aquanut-cara.png") 
 
 let drakon = new Personaje("Drakon", "./assets/drakon-personaje.png", 3, "./assets/drakon-cara.png")
@@ -157,13 +155,54 @@ drakon.ataques.push(...drakon_ataques)
 
 selvatron.ataques.push(...selvatron_ataques)
 
-// lista qur guarda todos los personajes
+// lista que guarda todos los personajes
 personajes.push(aquanut, drakon, selvatron)
+
+// inicia toda la logica basica del juego
+function iniciarJuego() {
+    unirseJuego()
+    enMapa = false
+
+    personajes.forEach((personaje) => {
+        opcionDePersonajes = `
+        <input type="radio" id=${personaje.nombre} name="mascota">
+        <label class="tarjeta-de-elemental" for=${personaje.nombre}>
+            <p>${personaje.nombre}</p>
+            <img src=${personaje.foto} alt="Error al cargar!">
+        </label>
+        `
+
+        contenedorTarjetas.innerHTML += opcionDePersonajes
+    })
+
+    mascota1 = document.getElementById("Aquanut")
+    mascota2 = document.getElementById("Drakon")
+    mascota3 = document.getElementById("Selvatron")
+    if (mascota1 && mascota2 && mascota3) {
+        console.log("Mascotas encontradas en el DOM")
+    } else {
+        console.log("No se encontraron las mascotas en el DOM")
+    }
+
+    sectionMenuPrincipal.style.display = "flex"
+    sectionMascota.style.display = "none"
+    sectionAtaque.style.display = "none"
+    sectionReiniciar.style.display = "none"
+    pantallaCreditos.style.display = "none"
+    sectionCanvasJuego.style.display = "none"
+
+    botonJugar.addEventListener("click", empezarJuego)
+    quitarJuego.addEventListener("click", cerrarJuego)
+    btnCreditos.addEventListener("click", mostrarCreditos)
+    botonMascota.addEventListener("click", seleccionarMascota)
+
+    botonReiniciar.addEventListener("click", reiniciarJuego)
+}
 
 //funcion que cancela todas las funciones y el pintado de un personaje que ya no esta en el juego
 function desconectarJugador() {
-    console.log("Jugador desconectado completamente")
     enMapa = false
+    console.log("Jugador desconectado completamente")
     
     // recibe la orden del servidor para ejecutar la funcion
     fetch(`${API_URL}/disconnect`, {
@@ -182,49 +221,14 @@ function desconectarJugador() {
     alert("Desconectado por inactividad")
 }
 
-// inicia toda la logica basica del juego
-function iniciarJuego() {
-    enMapa = false
-    unirseJuego()
-
-    personajes.forEach((personaje) => {
-        opcionDePersonajes = `
-        <input type="radio" id=${personaje.nombre} name="mascota">
-        <label class="tarjeta-de-elemental" for=${personaje.nombre}>
-            <p>${personaje.nombre}</p>
-            <img src=${personaje.foto} alt="Error al cargar!">
-        </label>
-        `
-
-        contenedorTarjetas.innerHTML += opcionDePersonajes
-
-        mascota1 = document.getElementById("Aquanut")
-        mascota2 = document.getElementById("Drakon")
-        mascota3 = document.getElementById("Selvatron")
-    })
-
-    sectionMenuPrincipal.style.display = "flex"
-    sectionMascota.style.display = "none"
-    sectionAtaque.style.display = "none"
-    sectionReiniciar.style.display = "none"
-    pantallaCreditos.style.display = "none"
-    sectionCanvasJuego.style.display = "none"
-
-    botonJugar.addEventListener("click", empezarJuego)
-    quitarJuego.addEventListener("click", cerrarJuego)
-    btnCreditos.addEventListener("click", mostrarCreditos)
-    botonMascota.addEventListener("click", seleccionarMascota)
-    botonReiniciar.addEventListener("click", reiniciarJuego)
-}
-
-// cada segundo ejecuta una funcion que evalua si el jugador esta inactivo, despues de 5 segundos de inactividad se desconecta al jugador
+// cada segundo ejecuta una funcion que evalua si el jugador esta inactivo, despues de 10 segundos de inactividad se desconecta al jugador
 setInterval(() => {
     if (!enMapa) return // 👈 SOLO en mapa
 
     const ahora = Date.now()
 
-    if (ahora - ultimoMovimiento > 5000) {
-        console.log("Inactivo 5s → desconectar")
+    if (ahora - ultimoMovimiento > 10000) {
+        console.log("Inactivo 10s → desconectar")
 
         const data = new Blob(
             [JSON.stringify({ jugadorId: jugadorId })],
@@ -239,7 +243,6 @@ setInterval(() => {
 
 // cada 2 segundos le manda actividad al servidor, si lleva 2 segundos sin actividad DENTRO del mapa, tambien desconecta al jugador ya que beforeunload puede fallar
 setInterval(() => {
-
     if (!jugadorId) return
 
     fetch(`${API_URL}/heartbeat`, {
@@ -252,7 +255,7 @@ setInterval(() => {
         })
     })
 
-}, 2000)
+}, 1000)
 
 // evalua si el jugador esta en dispositivo movil, si es asi muestra las flechas de movimiento, de lo contrario las oculta porque en pc se usan las teclas fisicas para moverse
 function dispositivoMovil() {
@@ -262,10 +265,10 @@ function dispositivoMovil() {
 }
 
 if (dispositivoMovil()) {
-        flechasDispositivo.style.display = "flex"
-    } else {
-        flechasDispositivo.style.display = "none"
-    }
+    flechasDispositivo.style.display = "flex"
+} else {
+    flechasDispositivo.style.display = "none"
+}
 
 // funcion para mostras los creditos
 function mostrarCreditos() {
@@ -290,23 +293,12 @@ function unirseJuego() {
         if (res.ok) {
             res.text()
                 .then(function (respuesta) {
-                    console.log(respuesta)
-                    console.log(res)
                     jugadorId = respuesta
+                    console.log(respuesta)
                 })
         }
     })
 }
-
-// detecta si el jugador cerró la pestaña o la ventana con el juego (inseguro) tiene respaldo de heartbeat (seguro)
-window.addEventListener("beforeunload", () => {
-    const data = new Blob(
-        [JSON.stringify({ jugadorId: jugadorId })],
-        { type: "application/json" }
-    )
-
-    navigator.sendBeacon(`${API_URL}/disconnect`, data)
-})
 
 // oculta la seccion de elegir mascota y muestra el mapa del juego
 function empezarJuego() {
@@ -336,12 +328,13 @@ function seleccionarMascota() {
         alert("Selecciona una mascota, porfavor")
         return
     }
-    sectionMascota.style.display = "none"
-    sectionCanvasJuego.style.display = "flex"
 
     mascotaSeleccionada(guardarMascota)
     extraerAtaques(guardarMascota)
     iniciarMapa()
+
+    sectionMascota.style.display = "none"
+    sectionCanvasJuego.style.display = "flex"
 }
 
 // le comunica al servidor que mascota eligio el jugador para mostrarlo a los demas jugadores
@@ -553,7 +546,7 @@ function aleatorio(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
-// pinta la mascota y el mapa, la mascota se pinta con la diferencia de que se pintan las coordenadas en tiempo real de la mascot y poder llamar a la funcion "enviarPosicion" con esta informacion
+// pinta la mascota y el mapa, la mascota se pinta con la diferencia de que se pintan las coordenadas en tiempo real de la mascota y poder llamar a la funcion "enviarPosicion" con esta informacion
 function pintarMascotaYJuego() {
     miPersonaje.x = miPersonaje.x + miPersonaje.velocidadX
     miPersonaje.y = miPersonaje.y + miPersonaje.velocidadY
