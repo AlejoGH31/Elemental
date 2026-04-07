@@ -452,7 +452,7 @@ function obtenerAtaques() {
                     })
             }
         })
-}
+    }
 
 // asigna el ataque seleccionado por cada jugador para mostrarlo en el resultado del combate
 function indexAmbosJugadores(jugador, enemigo) {
