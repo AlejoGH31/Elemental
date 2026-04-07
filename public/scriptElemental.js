@@ -464,6 +464,11 @@ function indexAmbosJugadores(jugador, enemigo) {
 function combate() {
     clearInterval(intervalo)
 
+    victoriasJugador = 0
+    victoriasEnemigo = 0
+
+    ataquesDelJugador.innerHTML = ""
+    ataquesDelEnemigo.innerHTML = ""
     for (let index = 0; index < ataqueDinamicoJugador.length; index++) {
         if(ataqueDinamicoJugador[index] === ataqueEnemigo[index]) {
             indexAmbosJugadores(index, index)
