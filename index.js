@@ -7,7 +7,7 @@ app.use(express.static("public"))
 app.use(cors())
 app.use(express.json())
 
-//variable globla que almacena a todos los jugadores
+//variable globlal que almacena a todos los jugadores
 let jugadores = []
 
 // clase con toda la informacion de cada jugador
@@ -77,9 +77,8 @@ app.post("/elemental/:jugadorId/posicion", (req, res) => {
         jugador.x = x
         jugador.y = y
     }
-    
-    // Filtra enemigos: solo los que tienen mascota definida
-    
+
+// Filtra enemigos: solo los que tienen mascota definida
     const enemigos = jugadores.filter(j => j.id !== jugadorId)
     res.json({ enemigos })
 })
