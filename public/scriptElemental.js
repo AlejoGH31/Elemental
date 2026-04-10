@@ -40,9 +40,7 @@ let API_URL = window.location.hostname === "localhost"
     ? "http://192.168.1.17:8080"
     : "https://elemental-754y.onrender.com"
 
-const socket = io(API_URL, {
-    transports: ["websocket"]
-});
+const socket = io(API_URL);
 
 // variables globales
 let jugadorId // id de cada jugador
