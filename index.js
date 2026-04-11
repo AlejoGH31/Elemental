@@ -77,7 +77,7 @@ app.post("/elemental/:jugadorId", (req, res) => {
 
 io.on("connection", (socket) => {
     console.log("Jugador conectado:", socket.id)
-
+    
     // 🔥 MOVIMIENTO
     socket.on("mover", (data) => {
 
@@ -109,13 +109,41 @@ io.on("connection", (socket) => {
         console.log("Jugador desconectado:", socket.id)
 
         // eliminar jugador usando su id lógico
-        jugadores = jugadores.filter(j => j.id !== socket.id)
+        jugadores = jugadores.filter(j => j.socketId !== socket.id)
+    })
+
+    socket.on("heartbeat", (data) => {
+        const jugador = jugadores.find(j => j.id === data.jugadorId)
+
+        if (jugador) {
+        jugador.ultimoLatido = Date.now()
+        }
+    })
+
+    socket.on("registrar", (jugadorId) => {
+        const jugador = jugadores.find(j => j.id === jugadorId)
+
+        if (jugador) {
+            jugador.socketId = socket.id
+        }
     })
 })
 
 setInterval(() => {
     io.emit("estado", jugadores)
 }, 50)
+
+setInterval(() => {
+    const ahora = Date.now()
+
+    jugadores = jugadores.filter(jugador => {
+        if (ahora - jugador.ultimoLatido > 5000) {
+            console.log("Jugador eliminado por inactividad:", jugador.id)
+            return false
+        }
+        return true
+    })
+}, 2000)
 
 // puerto del servidor en local
 const PORT = process.env.PORT || 8080

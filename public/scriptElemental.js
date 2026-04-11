@@ -40,8 +40,6 @@ let API_URL = window.location.hostname === "localhost"
     ? "http://192.168.1.17:8080"
     : "https://elemental-754y.onrender.com"
 
-const socket = io(API_URL);
-
 // variables globales
 let jugadorId // id de cada jugador
 let enemigoId // id de cada enemigo
@@ -75,6 +73,35 @@ const anchoMaximoMapa = 500
 let opcionDeAtaques
 let enMapa = false // controla si el jugador esta en el mapa para el sistema de desconexión por inactividad
 let ultimoMovimiento = Date.now() // el ultimo movimiento del jugador es ahora
+
+const socket = io(API_URL);
+
+socket.on("connect", () => {
+    console.log("🟢 Conectado al servidor con socket.io:", socket.id)
+})
+
+socket.on("estado", (jugadores) => {
+    personajesEnemigos = jugadores.map((jugador) => {
+        if (jugador.id !== jugadorId && jugador.mascota) {
+
+            let mascotaEnemiga
+
+            if (jugador.mascota.nombre === "Aquanut") {
+                mascotaEnemiga = new Personaje("Aquanut", "./assets/aquanut-juego.png", 3, "./assets/aquanut-cara.png", jugador.id)
+            } else if (jugador.mascota.nombre === "Drakon") {
+                mascotaEnemiga = new Personaje("Drakon", "./assets/drakon-personaje.png", 3, "./assets/drakon-cara.png", jugador.id)
+            } else if (jugador.mascota.nombre === "Selvatron") {
+                mascotaEnemiga = new Personaje("Selvatron", "./assets/Selvatron-personaje.png", 3, "./assets/selvatron-cara.png", jugador.id)
+            }
+
+            if (mascotaEnemiga) {
+                mascotaEnemiga.x = jugador.x
+                mascotaEnemiga.y = jugador.y
+                return mascotaEnemiga
+            }
+        }
+    }).filter(Boolean)
+})
 
 if (anchoDelMapa > anchoMaximoMapa) {
     anchoDelMapa = anchoMaximoMapa - 20
@@ -206,13 +233,6 @@ function desconectarJugador() {
     enMapa = false
     console.log("Jugador desconectado completamente")
     
-    // recibe la orden del servidor para ejecutar la funcion
-    fetch(`${API_URL}/disconnect`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ jugadorId: jugadorId })
-    })
-    
     lienzo.clearRect(0, 0, mapaJuego.width, mapaJuego.height)
     clearInterval(intervalo)
     window.removeEventListener("keydown", teclas)
@@ -225,36 +245,24 @@ function desconectarJugador() {
 
 // cada segundo ejecuta una funcion que evalua si el jugador esta inactivo, despues de 10 segundos de inactividad se desconecta al jugador
 setInterval(() => {
-    if (!enMapa) return // 👈 SOLO en mapa
+    if (!enMapa) return
 
     const ahora = Date.now()
 
     if (ahora - ultimoMovimiento > 10000) {
         console.log("Inactivo 10s → desconectar")
 
-        const data = new Blob(
-            [JSON.stringify({ jugadorId: jugadorId })],
-            { type: "application/json" }
-        )
-
-        navigator.sendBeacon(`${API_URL}/disconnect`, data)
-
-        desconectarJugador() 
+        desconectarJugador()
+        socket.disconnect()
     }
 }, 1000)
 
 // cada 2 segundos le manda actividad al servidor, si lleva 2 segundos sin actividad DENTRO del mapa, tambien desconecta al jugador ya que beforeunload puede fallar
 setInterval(() => {
-    if (!jugadorId) return
+    if (!jugadorId || !enMapa) return
 
-    fetch(`${API_URL}/heartbeat`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            jugadorId: jugadorId
-        })
+    socket.emit("heartbeat", {
+        jugadorId: jugadorId
     })
 
 }, 1000)
@@ -297,6 +305,7 @@ function unirseJuego() {
                 .then(function (respuesta) {
                     jugadorId = respuesta
                     console.log(respuesta)
+                    socket.emit("registrar", jugadorId)
                 })
         }
     })
@@ -342,7 +351,7 @@ function seleccionarMascota() {
 // le comunica al servidor que mascota eligio el jugador para mostrarlo a los demas jugadores
 function mascotaSeleccionada(guardarMascota) {
     fetch(`${API_URL}/elemental/${jugadorId}`, {
-        method: "post",
+        method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
@@ -428,32 +437,23 @@ function seleccionarMascotaEnemigo(enemigo) {
 
 // envia los ataques de ambos jugadores al servidor y cada 50ms obtiene los ataques del enemigo
 function enviarAtaques() {
-    fetch (`${API_URL}/elemental/${jugadorId}/ataques`, {
-        method: "post",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            ataques: ataqueDinamicoJugador
-        })
+    socket.emit("ataque", {
+        jugadorId: jugadorId,
+        ataque: ataqueDinamicoJugador
     })
-    intervalo = setInterval(obtenerAtaques, 50)
 }
 
 //obtiene los ataques de ambos jugadores, y si ambos seleccionaron 5 ataque se muestra el resultdado del combate
 function obtenerAtaques() {
-    fetch(`${API_URL}/elemental/${enemigoId}/ataques`)
-        .then(function (res) {
-            if(res.ok) {
-                res.json()
-                    .then(function ({ ataques }) {
-                        if (ataques.length === 5) {
-                            ataqueEnemigo = ataques
-                            combate()
-                        }
-                    })
-            }
-        })
+    socket.on("ataqueEnemigo", (data) => {
+    if (data.jugadorId !== jugadorId) {
+        ataqueEnemigo = data.ataque
+
+        if (ataqueEnemigo.length === 5) {
+            combate()
+        }
+    }
+})
 }
 
 // asigna el ataque seleccionado por cada jugador para mostrarlo en el resultado del combate
@@ -563,7 +563,11 @@ function pintarMascotaYJuego() {
     
     miPersonaje.pintarMascota()
 
-    enviarPosicion(miPersonaje.x, miPersonaje.y)
+    socket.emit("mover", {
+    jugadorId: jugadorId,
+    x: miPersonaje.x,
+    y: miPersonaje.y
+    })
 
     personajesEnemigos.forEach(function (enemigo) {
         if (enemigo != undefined) {
@@ -574,46 +578,7 @@ function pintarMascotaYJuego() {
 }
 
 // envia la posicion en tiempo real de la mascota al servidor, para que otros jugadores puedan ver el movimiento de las mascotas. Tambien evalua si la mascota enemiga existe, si no existe crea todos los valores necesarios para que la mascota exista y todo funcione correctamente
-function enviarPosicion(x, y) { 
-    fetch(`${API_URL}/elemental/${jugadorId}/posicion`, { 
-        method: "post", 
-        headers: { 
-            "Content-Type": "application/json" 
-        }, 
-        body: JSON.stringify({ 
-            x, 
-            y 
-        }) 
-    }) 
-      .then(function (res) { 
-            if (res.ok) { 
-                res.json() 
-                .then(function ({ enemigos }) { 
-                    console.log(enemigos)
-                    personajesEnemigos = enemigos.map(function (enemigo) { 
-                        if (enemigo.mascota != undefined) { 
-                            let mascotaEnemiga
-                            const mascotaNombre = enemigo.mascota.nombre || ""
-                            
-                            if (mascotaNombre === "Aquanut") {
-                                mascotaEnemiga = new Personaje("Aquanut", "./assets/aquanut-juego.png", 3, "./assets/aquanut-cara.png", enemigo.id)
-                            } else if (mascotaNombre === "Drakon") {
-                                mascotaEnemiga = new Personaje("Drakon", "./assets/drakon-personaje.png", 3, "./assets/drakon-cara.png", enemigo.id)
-                            } else if (mascotaNombre === "Selvatron") {
-                                mascotaEnemiga = new Personaje("Selvatron", "./assets/Selvatron-personaje.png", 3, "./assets/selvatron-cara.png", enemigo.id)
-                            }
-                            
-                            if (mascotaEnemiga) {
-                                mascotaEnemiga.x = enemigo.x 
-                                mascotaEnemiga.y = enemigo.y 
-                                return mascotaEnemiga 
-                            }
-                        } 
-                    }).filter(enemigo => enemigo != undefined) 
-                    }) 
-                } 
-            }) 
-        }
+
 
 // funcion con condicional switch que evalua que tecla fisica fue presionada en un disposisitivo no movil para ejecutar cierta funcion para cada grupo de casos y mover al personaje segun la tecla presionada
 function teclas(event) {
